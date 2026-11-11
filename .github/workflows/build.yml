@@ -1,0 +1,91 @@
+name: Build and Release YT-FORGE
+
+on:
+  workflow_dispatch:
+
+# 1. ADD THIS PERMISSIONS BLOCK
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Build on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      matrix: # ... (KEEP YOUR MATRIX EXACTLY AS IT WAS) ...
+        include:
+          - os: macos-latest
+            script: npm run dist:mac:arm
+          - os: windows-latest
+            script: npm run dist:win
+          - os: ubuntu-latest
+            script: npm run dist:linux
+          - os: ubuntu-24.04-arm
+            script: npm run dist:linux:arm
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      # ... (KEEP ALL YOUR YT-DLP AND NPM CI INSTALL STEPS EXACTLY AS THEY WERE) ...
+
+      # `curl -f` makes a missing asset fail the build instead of silently
+      # packaging a GitHub 404 page where the yt-dlp binary should be.
+      - name: Download yt-dlp (macOS)
+        if: startsWith(matrix.os, 'macos')
+        run: |
+          mkdir -p bin
+          curl -fL https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp_macos -o bin/yt-dlp_macos
+          chmod +x bin/yt-dlp_macos
+          ./bin/yt-dlp_macos --version
+
+      # electron-builder.yml installs bin/yt-dlp_linux_${arch} as
+      # resources/bin/yt-dlp_linux, so the download has to land under the
+      # per-CPU name or the packaging step ships the stale binary from git
+      # (x64) or fails outright (arm64). yt-dlp's self-updater detects its own
+      # variant at runtime, so the filename does not affect `-U`.
+      - name: Download yt-dlp (Linux)
+        if: startsWith(matrix.os, 'ubuntu')
+        run: |
+          mkdir -p bin
+          case "$(uname -m)" in
+            aarch64|arm64) ASSET=yt-dlp_linux_aarch64; DEST=bin/yt-dlp_linux_arm64 ;;
+            *) ASSET=yt-dlp_linux; DEST=bin/yt-dlp_linux_x64 ;;
+          esac
+          echo "Downloading $ASSET for $(uname -m) -> $DEST"
+          curl -fL "https://github.com/yt-dlp/yt-dlp/releases/latest/download/$ASSET" -o "$DEST"
+          chmod +x "$DEST"
+          "./$DEST" --version
+
+      - name: Download yt-dlp (Windows)
+        if: startsWith(matrix.os, 'windows')
+        shell: bash
+        run: |
+          mkdir -p bin
+          curl -fL https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp.exe -o bin/yt-dlp.exe
+          ./bin/yt-dlp.exe --version
+
+      - name: Install Code Dependencies
+        run: npm ci
+
+      - name: Build & Publish to GitHub Releases
+        env:
+          # 2. CHANGE TO secrets.GITHUB_TOKEN
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: ${{ matrix.script }} -- -p always
+
+      - name: Upload Artifacts (Fallback)
+        uses: actions/upload-artifact@v4
+        with:
+          name: YT-Forge-Builds-${{ matrix.os }}
+          path: |
+            release/*.dmg
+            release/*.exe
+            release/*.AppImage
+          retention-days: 5

@@ -1,0 +1,91 @@
+appId: com.suja.ytforge
+productName: YT-Forge
+icon: build/icon.png
+directories:
+  output: release
+
+# ffprobe-static ships a binary for every platform (~300 MB in total). Each
+# platform block below keeps only bin/<platform>/<arch>, the one path
+# ffprobe-static/index.js resolves at runtime. The include lines are repeated
+# on purpose: a platform-specific `files` REPLACES this top-level list (verified
+# 2026-09-06 — negations alone made electron-builder fall back to `**/*` and
+# ship the whole repo, 1.4 GB). There is no arm64 ffprobe for Windows or Linux
+# at all; those builds fall back gracefully (audio is re-encoded instead of
+# stream-copied during H.264 conversion).
+files:
+  - dist-electron/**/*
+  - dist/**/*
+  - package.json
+
+asar: true
+asarUnpack:
+  - "**/node_modules/ffmpeg-static/**"
+  - "**/node_modules/ffprobe-static/**"
+
+mac:
+  # There is no Developer ID certificate for this project, and with no `identity`
+  # set electron-builder skips signing *entirely* (MacTargetHelper.findSigningIdentity
+  # falls through to `noIdentity` and returns null). The bundle then ships carrying
+  # only Electron's upstream linker signature, whose seal references a
+  # _CodeSignature directory that no longer exists after repacking — macOS calls
+  # that "damaged and can't be opened" and offers no Open Anyway path. The literal
+  # "-" is the only value that makes electron-builder ad-hoc sign the whole bundle,
+  # which produces a valid seal. (`identity: null` means skip, not ad-hoc.)
+  identity: "-"
+  # Hardened runtime only buys anything alongside notarization, which needs the
+  # Developer ID we do not have. With ad-hoc signing it additionally turns on
+  # library validation — electron-builder warns about exactly this combination.
+  hardenedRuntime: false
+  files:
+    - dist-electron/**/*
+    - dist/**/*
+    - package.json
+    - "!**/node_modules/ffprobe-static/bin/!(darwin)/**"
+    - "!**/node_modules/ffprobe-static/bin/darwin/!(${arch})/**"
+  target:
+    - dmg
+    - zip
+  category: public.app-category.utilities
+  extraResources:
+    - from: bin/yt-dlp_macos
+      to: bin/yt-dlp_macos
+
+win:
+  files:
+    - dist-electron/**/*
+    - dist/**/*
+    - package.json
+    - "!**/node_modules/ffprobe-static/bin/!(win32)/**"
+    - "!**/node_modules/ffprobe-static/bin/win32/!(${arch})/**"
+  target:
+    - nsis
+  extraResources:
+    - from: bin/yt-dlp.exe
+      to: bin/yt-dlp.exe
+
+nsis:
+  oneClick: true
+  perMachine: false
+
+linux:
+  files:
+    - dist-electron/**/*
+    - dist/**/*
+    - package.json
+    - "!**/node_modules/ffprobe-static/bin/!(linux)/**"
+    - "!**/node_modules/ffprobe-static/bin/linux/!(${arch})/**"
+  target:
+    - AppImage
+    - deb
+  category: AudioVideo
+  # One standalone yt-dlp per CPU architecture, installed under the single
+  # name main.js looks for. ${arch} is x64 or arm64 (electron-builder's names,
+  # hence bin/yt-dlp_linux_x64 rather than yt-dlp's own "yt-dlp_linux").
+  extraResources:
+    - from: bin/yt-dlp_linux_${arch}
+      to: bin/yt-dlp_linux
+
+publish:
+  provider: github
+  owner: YT-Forge-Official
+  repo: YT-Forge
