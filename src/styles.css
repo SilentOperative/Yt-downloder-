@@ -35,3 +35,12 @@
   footer { flex-direction: column; gap: 8px; line-height: 1.5; }
   .settings-modal { width: calc(100vw - 32px); max-width: 420px; }
 }
+
+.transfer-panel { border: 1px solid var(--line); background: rgba(18,18,24,.78); border-radius: 12px; padding: 15px 17px; margin: 0 0 24px; }
+.transfer-heading, .transfer-meta { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.transfer-heading strong { display: block; color: var(--text); font-size: 12px; margin-top: 6px; }
+.progress-track { height: 7px; overflow: hidden; background: var(--panel-2); border-radius: 99px; margin: 14px 0 10px; }
+.progress-fill { height: 100%; min-width: 3px; background: linear-gradient(90deg, var(--accent), #c4b5fd); border-radius: inherit; transition: width .2s ease; }
+.progress-fill.indeterminate { animation: progress-pulse 1.25s ease-in-out infinite; }
+.transfer-meta { color: var(--soft); font: 10px 'IBM Plex Mono', monospace; }
+@keyframes progress-pulse { 0%, 100% { transform: translateX(-35%); opacity: .55; } 50% { transform: translateX(165%); opacity: 1; } }

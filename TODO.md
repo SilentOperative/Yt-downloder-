@@ -10,3 +10,4 @@
 - [x] Verify the root web build after the conversion and push the final web-first version to GitHub main.
 - [x] Keep the same interface and workflow usable on mobile browsers through responsive layout geometry.
 - [x] Add Vercel serverless health, metadata, and download endpoints using the bundled Linux yt-dlp binary.
+- [x] Stream browser downloads with a progress bar, transfer speed, percentage, and estimated time remaining.
