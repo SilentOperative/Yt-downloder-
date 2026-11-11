@@ -2,25 +2,26 @@
 
 ## Goal
 
-Preserve the existing YT-FORGE desktop application while adding a desktop-browser website for Windows, Linux, and macOS. The web version keeps the compact creator-tool workflow and runs downloads locally through a companion Node service.
+Convert YT-FORGE from an Electron desktop application into a desktop-browser website for Windows, Linux, and macOS. The active repository is web-first at its root; desktop Electron source, release packaging, and desktop build configuration are no longer part of the active application.
 
 ## Implementation approach
 
-- Keep the existing Electron app, platform binaries, assets, and release files in the repository.
-- Add a self-contained `web/` React/Vite browser application.
-- Add `web/server/index.mjs`, a local API that invokes the platform-appropriate `yt-dlp` binary and streams browser downloads.
+- Use the root React/Vite application as the browser control surface.
+- Keep only the platform yt-dlp binaries needed by the local companion service.
+- Use `server/index.mjs` as a small local API that invokes the platform-appropriate binary and streams browser downloads.
 - Store history and preferences in browser local storage.
 - Keep the layout desktop-oriented and show an explicit desktop-browser message on narrow phone screens.
-- Include Vercel settings for publishing the static UI, with documentation explaining that Vercel cannot access a visitor's local filesystem or executable.
+- Use the root Vercel configuration to publish the static UI, with documentation explaining that Vercel cannot access a visitor's local filesystem or executable.
 
 ## Design
 
-Chosen direction: restrained studio utility with graphite surfaces. The UI uses dark graphite panels, an electric violet action color, compact status pills, monospaced technical metadata, short loading motion, and direct operational copy. The existing YT-FORGE mark and product identity are preserved.
+Chosen direction: restrained studio utility with graphite surfaces. The UI uses dark graphite panels, an electric violet action color, compact status pills, monospaced technical metadata, short loading motion, and direct operational copy. The YT-FORGE product identity is preserved.
 
 ## Structure
 
-- Existing root `src/`, `bin/`, `release/`, and Electron configuration remain the desktop distribution.
-- `web/src/` contains the browser UI.
-- `web/server/` contains the local yt-dlp API.
-- `web/public/` contains static route metadata.
-- `web/README.md` contains local and Vercel deployment instructions.
+- `src/` contains the browser React UI.
+- `server/` contains the local yt-dlp API.
+- `public/` contains static route metadata.
+- `bin/` contains the platform yt-dlp binaries used by local mode.
+- `package.json`, `vite.config.js`, and `vercel.json` define local development, production build, and manual Vercel deployment.
+- `README.md` documents the local-first architecture and deployment boundary.
