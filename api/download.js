@@ -8,8 +8,17 @@ function safeName(value) {
 export default function handler(req, res) {
   const url = req.query?.url || '';
   const format = ['mp4', 'mp3', 'm4a', 'best'].includes(req.query?.format) ? req.query.format : 'mp4';
+  const requestedQuality = String(req.query?.quality || 'best');
+  const validQuality = requestedQuality === 'best' || ['2160', '1440', '1080', '720', '480', '360'].includes(requestedQuality);
+  const height = validQuality && requestedQuality !== 'best' ? `[height<=${requestedQuality}]` : '';
   if (!validUrl(url)) return json(res, 400, { error: 'Enter a valid http(s) URL.' });
-  const formatArg = format === 'mp3' ? 'bestaudio/best' : format === 'm4a' ? 'bestaudio[ext=m4a]/bestaudio' : format === 'best' ? 'best' : 'best[ext=mp4]/best';
+  const formatArg = format === 'mp3'
+    ? 'bestaudio/best'
+    : format === 'm4a'
+      ? 'bestaudio[ext=m4a]/bestaudio'
+      : format === 'best'
+        ? `bestvideo${height}+bestaudio/best${height}/best`
+        : `bestvideo[ext=mp4]${height}+bestaudio[ext=m4a]/best[ext=mp4]${height}/best${height}`;
   const child = spawn(binaryPath(), ['--no-warnings', '--ignore-config', '--no-playlist', '-f', formatArg, '-o', '-', url]);
   let stderr = '';
   let headerSent = false;

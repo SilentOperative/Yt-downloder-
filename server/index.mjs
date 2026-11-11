@@ -103,10 +103,19 @@ async function handleInfo(req, res, url) {
   }
 }
 
-function handleDownload(req, res, url, format) {
+function handleDownload(req, res, url, format, quality) {
   if (!validUrl(url)) return json(res, 400, { error: 'Enter a valid http(s) URL.' });
   const chosenFormat = ['mp4', 'mp3', 'm4a', 'best'].includes(format) ? format : 'mp4';
-  const formatArg = chosenFormat === 'mp3' ? 'bestaudio/best' : chosenFormat === 'm4a' ? 'bestaudio[ext=m4a]/bestaudio' : chosenFormat === 'best' ? 'best' : 'best[ext=mp4]/best';
+  const requestedQuality = String(quality || 'best');
+  const validQuality = requestedQuality === 'best' || ['2160', '1440', '1080', '720', '480', '360'].includes(requestedQuality);
+  const height = validQuality && requestedQuality !== 'best' ? `[height<=${requestedQuality}]` : '';
+  const formatArg = chosenFormat === 'mp3'
+    ? 'bestaudio/best'
+    : chosenFormat === 'm4a'
+      ? 'bestaudio[ext=m4a]/bestaudio'
+      : chosenFormat === 'best'
+        ? `bestvideo${height}+bestaudio/best${height}/best`
+        : `bestvideo[ext=mp4]${height}+bestaudio[ext=m4a]/best[ext=mp4]${height}/best${height}`;
   const child = spawn(binaryPath(), ['--no-warnings', '--ignore-config', '--no-playlist', '-f', formatArg, '--print', 'after_move:filepath', '-o', '-', url], { windowsHide: true });
   let stderr = '';
   let headerSent = false;
@@ -136,7 +145,7 @@ const server = http.createServer(async (req, res) => {
   }
   if (requestUrl.pathname === '/api/health') return json(res, 200, { ok: true, engine: existsSync(binaryPath()) ? 'yt-dlp-ready' : 'yt-dlp-missing' });
   if (requestUrl.pathname === '/api/info') return handleInfo(req, res, requestUrl.searchParams.get('url') || '');
-  if (requestUrl.pathname === '/api/download') return handleDownload(req, res, requestUrl.searchParams.get('url') || '', requestUrl.searchParams.get('format') || 'mp4');
+  if (requestUrl.pathname === '/api/download') return handleDownload(req, res, requestUrl.searchParams.get('url') || '', requestUrl.searchParams.get('format') || 'mp4', requestUrl.searchParams.get('quality') || 'best');
   json(res, 404, { error: 'Not found' });
 });
 
