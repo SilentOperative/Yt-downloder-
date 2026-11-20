@@ -114,8 +114,8 @@ function handleDownload(req, res, url, format, quality) {
     : chosenFormat === 'm4a'
       ? 'bestaudio[ext=m4a]/bestaudio'
       : chosenFormat === 'best'
-        ? `bestvideo${height}+bestaudio/best${height}/best`
-        : `bestvideo[ext=mp4]${height}+bestaudio[ext=m4a]/best[ext=mp4]${height}/best${height}`;
+        ? `best${height}/best`
+        : `best[ext=mp4]${height}/best${height}/best`;
   const binary = binaryPath();
   if (!existsSync(binary)) return json(res, 503, { error: `yt-dlp binary not found at ${binary}` });
   const child = spawn(binary, ['--no-warnings', '--ignore-config', '--no-playlist', '--no-part', '-f', formatArg, '-o', '-', url], { windowsHide: true });
