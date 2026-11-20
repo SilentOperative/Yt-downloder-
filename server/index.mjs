@@ -105,7 +105,7 @@ async function handleInfo(req, res, url) {
 
 function handleDownload(req, res, url, format, quality) {
   if (!validUrl(url)) return json(res, 400, { error: 'Enter a valid http(s) URL.' });
-  const chosenFormat = ['mp4', 'mp3', 'm4a', 'best'].includes(format) ? format : 'mp4';
+  const chosenFormat = ['mp4', 'm4a', 'best'].includes(format) ? format : 'mp4';
   const requestedQuality = String(quality || 'best');
   const validQuality = requestedQuality === 'best' || ['2160', '1440', '1080', '720', '480', '360'].includes(requestedQuality);
   const height = validQuality && requestedQuality !== 'best' ? `[height<=${requestedQuality}]` : '';
@@ -126,7 +126,7 @@ function handleDownload(req, res, url, format, quality) {
     if (!headerSent) {
       headerSent = true;
       res.writeHead(200, {
-        'content-type': chosenFormat === 'mp3' || chosenFormat === 'm4a' ? 'audio/mpeg' : 'video/mp4',
+        'content-type': chosenFormat === 'm4a' ? 'audio/mp4' : 'video/mp4',
         'content-disposition': `attachment; filename="${safeName(url)}.${chosenFormat === 'best' ? 'mp4' : chosenFormat}"`,
         'access-control-allow-origin': '*',
         'cache-control': 'no-store',
