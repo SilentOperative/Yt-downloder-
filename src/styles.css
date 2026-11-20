@@ -44,3 +44,73 @@
 .progress-fill.indeterminate { animation: progress-pulse 1.25s ease-in-out infinite; }
 .transfer-meta { color: var(--soft); font: 10px 'IBM Plex Mono', monospace; }
 @keyframes progress-pulse { 0%, 100% { transform: translateX(-35%); opacity: .55; } 50% { transform: translateX(165%); opacity: 1; } }
+
+
+/* YT-FORGE visual refresh — crisp desktop workspace, compact mobile shell. */
+:root { --accent:#9b7bff; --accent-soft:rgba(155,123,255,.14); --panel:#11111a; --panel-2:#191827; --line:rgba(174,160,220,.16); }
+body { min-width:320px; }
+.app-shell { background:radial-gradient(ellipse at 76% -10%,rgba(123,92,246,.18),transparent 42%),radial-gradient(ellipse at 5% 70%,rgba(55,95,170,.07),transparent 38%),var(--bg); }
+.rail { background:rgba(12,12,19,.72); backdrop-filter:blur(18px); }
+.brand-mark { width:40px;height:40px;border-radius:13px;box-shadow:0 8px 30px rgba(112,76,210,.22); }
+.workspace { max-width:1360px;padding-top:38px; }
+.topbar { padding-bottom:18px;border-bottom:1px solid var(--line); }
+.topbar h1 { font-size:clamp(20px,2vw,26px); }
+.hero-panel { grid-template-columns:minmax(230px,.72fr) minmax(0,1.55fr);gap:36px;margin:28px 0 26px; }
+.hero-copy h2 { font-size:clamp(44px,5vw,64px); }
+.hero-copy p { max-width:330px;font-size:13px; }
+.intake-card,.result-panel,.history-panel,.transfer-panel { border-color:var(--line);background:linear-gradient(145deg,rgba(27,25,40,.92),rgba(15,15,22,.92));box-shadow:0 18px 55px rgba(0,0,0,.16);border-radius:18px; }
+.intake-card { padding:25px; }
+.url-row { min-height:56px;border-radius:12px;background:rgba(5,5,10,.45); }
+.inspect-button,.primary-button { border-radius:10px;min-height:42px;box-shadow:0 8px 24px rgba(122,88,226,.18); }
+.status-pill { padding:9px 13px;background:rgba(255,255,255,.025); }
+.result-panel,.history-panel { overflow:hidden; }
+.section-heading { padding:22px 24px 18px; }
+.media-summary { padding:22px 24px;gap:20px; }
+.thumb-wrap { width:160px;height:90px;border-radius:11px; }
+.download-controls select { border-radius:10px;padding:11px 10px; }
+.playlist-row,.history-row { padding:13px 0; }
+.row-download { border-radius:9px; }
+.alert { border-radius:12px;padding:15px 17px; }
+.transfer-panel { padding:19px 21px; }
+.settings-modal { border-radius:20px;background:rgba(20,19,29,.97);backdrop-filter:blur(22px); }
+button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible { outline:2px solid var(--accent);outline-offset:3px; }
+button:disabled { opacity:.42;cursor:not-allowed; }
+@media(max-width:959px) {
+  .rail { padding:14px 16px 11px; }
+  .brand-mark { width:36px;height:36px; }
+  .signal-line { margin:11px 0 10px; }
+  .rail-section { display:flex;align-items:center;flex-wrap:wrap;gap:6px; }
+  .rail-section .eyebrow { flex-basis:100%; }
+  .rail-item { flex:1;justify-content:center;min-width:0;font-size:11px; }
+  .rail-bottom { margin-top:8px; }
+  .workspace { padding:19px 14px 28px; }
+  .topbar { margin-bottom:17px;padding-bottom:15px; }
+  .hero-panel { grid-template-columns:1fr;gap:5px;margin:16px 0 19px; }
+  .hero-copy { padding:0 2px 10px; }
+  .hero-copy h2 { font-size:clamp(39px,12vw,54px);margin:9px 0 10px; }
+  .hero-copy p { max-width:360px;margin-bottom:4px; }
+  .intake-card { padding:17px; }
+  .url-row { gap:8px; }
+  .url-row input { font-size:13px; }
+  .section-heading { padding:17px 16px 14px; }
+  .media-summary { padding:16px;gap:13px; }
+  .thumb-wrap { width:100%;height:auto;aspect-ratio:16/9;max-height:210px; }
+  .download-controls { display:grid;grid-template-columns:1fr 1fr;gap:0 9px; }
+  .download-controls label:nth-of-type(2) { grid-column:1; }
+  .download-controls select:nth-of-type(2) { grid-column:2;grid-row:2; }
+  .download-controls .primary-button { grid-column:1/-1;margin-top:5px; }
+  .transfer-meta { flex-wrap:wrap;font-size:9px; }
+  .settings-modal { width:calc(100vw - 24px);padding:18px; }
+}
+@media(max-width:420px) {
+  .workspace { padding-left:12px;padding-right:12px; }
+  .top-actions { gap:5px; }
+  .status-pill { font-size:8px;padding:6px 7px; }
+  .hero-copy h2 { font-size:39px; }
+  .intake-foot { font-size:9px; }
+  .download-controls { grid-template-columns:1fr; }
+  .download-controls label:nth-of-type(2),.download-controls select:nth-of-type(2),.download-controls .primary-button { grid-column:1;grid-row:auto; }
+}
+@media(prefers-reduced-motion:reduce) {
+  *,*::before,*::after { scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important; }
+}
