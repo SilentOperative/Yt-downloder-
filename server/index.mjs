@@ -116,7 +116,9 @@ function handleDownload(req, res, url, format, quality) {
       : chosenFormat === 'best'
         ? `bestvideo${height}+bestaudio/best${height}/best`
         : `bestvideo[ext=mp4]${height}+bestaudio[ext=m4a]/best[ext=mp4]${height}/best${height}`;
-  const child = spawn(binaryPath(), ['--no-warnings', '--ignore-config', '--no-playlist', '-f', formatArg, '--print', 'after_move:filepath', '-o', '-', url], { windowsHide: true });
+  const binary = binaryPath();
+  if (!existsSync(binary)) return json(res, 503, { error: `yt-dlp binary not found at ${binary}` });
+  const child = spawn(binary, ['--no-warnings', '--ignore-config', '--no-playlist', '--no-part', '-f', formatArg, '-o', '-', url], { windowsHide: true });
   let stderr = '';
   let headerSent = false;
   child.stderr.on('data', (chunk) => { stderr += chunk.toString(); });
@@ -134,7 +136,10 @@ function handleDownload(req, res, url, format, quality) {
     child.stdout.pipe(res);
   });
   child.on('error', (error) => { if (!headerSent) json(res, 502, { error: error.message }); else res.destroy(error); });
-  child.on('close', (code) => { if (!headerSent && code !== 0) json(res, 502, { error: stderr.trim() || `yt-dlp exited with code ${code}` }); });
+  child.on('close', (code) => {
+    if (!headerSent && code !== 0) json(res, 502, { error: stderr.trim() || `yt-dlp exited with code ${code}` });
+    else if (!headerSent && code === 0) json(res, 502, { error: 'The media engine finished without returning a file. Try another format or update yt-dlp.' });
+  });
 }
 
 const server = http.createServer(async (req, res) => {
