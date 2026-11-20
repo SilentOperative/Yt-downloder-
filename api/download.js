@@ -21,7 +21,7 @@ export default function handler(req, res) {
         ? `bestvideo${height}+bestaudio/best${height}/best`
         : `bestvideo[ext=mp4]${height}+bestaudio[ext=m4a]/best[ext=mp4]${height}/best${height}`;
   if (!existsSync(binaryPath())) return json(res, 503, { error: 'The yt-dlp binary is missing from this deployment. Check the Vercel function includeFiles configuration and bin/yt-dlp_linux_x64.' });
-  const child = spawn(binaryPath(), ['--no-warnings', '--ignore-config', '--no-playlist', '-f', formatArg, '-o', '-', url]);
+  const child = spawn(binaryPath(), ['--no-warnings', '--ignore-config', '--no-playlist', '--no-part', '-f', formatArg, '-o', '-', url]);
   let stderr = '';
   let headerSent = false;
   child.stderr.on('data', (chunk) => { stderr += chunk.toString(); });
@@ -35,7 +35,10 @@ export default function handler(req, res) {
     child.stdout.pipe(res);
   });
   child.on('error', (error) => { if (!headerSent) json(res, 502, { error: explainYtDlpError(error.message) }); else res.destroy(error); });
-  child.on('close', (code) => { if (!headerSent && code !== 0) json(res, 502, { error: explainYtDlpError(stderr.trim() || `yt-dlp exited with code ${code}`) }); });
+  child.on('close', (code) => {
+    if (!headerSent && code !== 0) json(res, 502, { error: explainYtDlpError(stderr.trim() || `yt-dlp exited with code ${code}`) });
+    else if (!headerSent && code === 0) json(res, 502, { error: 'The media engine finished without returning a file. Try another format or update yt-dlp.' });
+  });
 }
 
 export const config = { maxDuration: 60 };
