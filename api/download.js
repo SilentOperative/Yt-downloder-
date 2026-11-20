@@ -8,7 +8,7 @@ function safeName(value) {
 
 export default function handler(req, res) {
   const url = req.query?.url || '';
-  const format = ['mp4', 'mp3', 'm4a', 'best'].includes(req.query?.format) ? req.query.format : 'mp4';
+  const format = ['mp4', 'm4a', 'best'].includes(req.query?.format) ? req.query.format : 'mp4';
   const requestedQuality = String(req.query?.quality || 'best');
   const validQuality = requestedQuality === 'best' || ['2160', '1440', '1080', '720', '480', '360'].includes(requestedQuality);
   const height = validQuality && requestedQuality !== 'best' ? `[height<=${requestedQuality}]` : '';
@@ -28,7 +28,7 @@ export default function handler(req, res) {
   child.stdout.once('data', (chunk) => {
     headerSent = true;
     res.statusCode = 200;
-    res.setHeader('content-type', format === 'mp3' || format === 'm4a' ? 'audio/mpeg' : 'video/mp4');
+    res.setHeader('content-type', format === 'm4a' ? 'audio/mp4' : 'video/mp4');
     res.setHeader('content-disposition', `attachment; filename="${safeName(url)}.${format === 'best' ? 'mp4' : format}"`);
     res.setHeader('cache-control', 'no-store');
     res.write(chunk);
