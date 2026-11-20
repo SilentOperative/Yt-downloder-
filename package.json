@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "concurrently -k \"vite --host 0.0.0.0\" \"node server/index.mjs\"",
     "server": "node server/index.mjs",
-    "build": "vite build",
+    "build": "node scripts/update-yt-dlp.mjs && vite build",
     "preview": "vite preview --host 0.0.0.0"
   },
   "dependencies": {
