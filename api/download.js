@@ -18,8 +18,8 @@ export default function handler(req, res) {
     : format === 'm4a'
       ? 'bestaudio[ext=m4a]/bestaudio'
       : format === 'best'
-        ? `bestvideo${height}+bestaudio/best${height}/best`
-        : `bestvideo[ext=mp4]${height}+bestaudio[ext=m4a]/best[ext=mp4]${height}/best${height}`;
+        ? `best${height}/best`
+        : `best[ext=mp4]${height}/best${height}/best`;
   if (!existsSync(binaryPath())) return json(res, 503, { error: 'The yt-dlp binary is missing from this deployment. Check the Vercel function includeFiles configuration and bin/yt-dlp_linux_x64.' });
   const child = spawn(binaryPath(), ['--no-warnings', '--ignore-config', '--no-playlist', '--no-part', '-f', formatArg, '-o', '-', url]);
   let stderr = '';
